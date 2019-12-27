@@ -21,6 +21,8 @@ module.exports = app => {
 
     const branch = ref.replace(/^refs\/heads\//, '')
 
+    const targetBranch = config['target-branch']
+
     if (!config.template) {
       log({ app, context, message: 'No valid config found' })
       return
@@ -30,7 +32,11 @@ module.exports = app => {
       return
     }
 
-    const { draftRelease, lastRelease } = await findReleases({ app, context })
+    const { draftRelease, lastRelease } = await findReleases({
+      app,
+      context,
+      targetBranch
+    })
     const {
       commits,
       pullRequests: mergedPullRequests
@@ -62,7 +68,8 @@ module.exports = app => {
           tag_name: releaseInfo.tag,
           body: releaseInfo.body,
           draft: true,
-          prerelease: config.prerelease
+          prerelease: config.prerelease,
+          ...(targetBranch ? { target_commitish: targetBranch } : {})
         })
       )
       const {
