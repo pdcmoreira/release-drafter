@@ -12,7 +12,7 @@ module.exports = app => {
       app,
       context,
       getConfig: require('probot-config'),
-      configName: process.env['CONFIG_NAME']
+      configName: core.getInput('config-name')
     })
 
     // GitHub Actions merge payloads slightly differ, in that their ref points
