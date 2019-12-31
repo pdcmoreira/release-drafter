@@ -50,7 +50,10 @@ module.exports = app => {
       commits,
       config,
       lastRelease,
-      mergedPullRequests: sortedMergedPullRequests
+      mergedPullRequests: sortedMergedPullRequests,
+      version: core.getInput('version'),
+      tag: core.getInput('tag'),
+      name: core.getInput('name')
     })
 
     let createOrUpdateReleaseResponse
