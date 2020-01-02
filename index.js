@@ -58,9 +58,9 @@ module.exports = app => {
       config,
       lastRelease,
       mergedPullRequests: sortedMergedPullRequests,
-      version: core.getInput('version'),
-      tag: core.getInput('tag'),
-      name: core.getInput('name')
+      version: core.getInput('version') || undefined,
+      tag: core.getInput('tag') || undefined,
+      name: core.getInput('name') || undefined
     })
 
     let createOrUpdateReleaseResponse
