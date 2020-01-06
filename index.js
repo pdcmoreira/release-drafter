@@ -27,7 +27,11 @@ module.exports = app => {
       return
     }
 
-    const { draftRelease, lastRelease } = await findReleases({ app, context })
+    const { draftRelease, lastRelease } = await findReleases({
+      app,
+      context,
+      branch: config['target-branch']
+    })
     const {
       commits,
       pullRequests: mergedPullRequests
@@ -63,7 +67,9 @@ module.exports = app => {
           tag_name: releaseInfo.tag,
           body: releaseInfo.body,
           draft: true,
-          prerelease: config.prerelease
+          prerelease: config.prerelease,
+          target_commitish:
+            config['target-branch'] || context.payload.repository.default_branch
         })
       )
     } else {

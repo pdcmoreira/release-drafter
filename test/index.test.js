@@ -1466,4 +1466,149 @@ Previous tag: ''
       })
     })
   })
+
+  describe('branch-scoping', () => {
+    describe('without target-branch input', () => {
+      it('targets default branch and calculates version based on any branch', async () => {
+        getConfigMock('config-with-major-minor-patch-version-template.yml')
+
+        nock('https://api.github.com')
+          .get('/repos/toolmantim/release-drafter-test-project/releases')
+          .query(true)
+          .reply(200, [
+            require('./fixtures/release-2'),
+            require('./fixtures/release'),
+            require('./fixtures/release-3'),
+            require('./fixtures/pre-release-staging-branch')
+          ])
+
+        nock('https://api.github.com')
+          .post('/graphql', body =>
+            body.query.includes('query findCommitsWithAssociatedPullRequests')
+          )
+          .reply(
+            200,
+            require('./fixtures/__generated__/graphql-commits-merge-commit.json')
+          )
+
+        nock('https://api.github.com')
+          .post(
+            '/repos/toolmantim/release-drafter-test-project/releases',
+            body => {
+              expect(body).toMatchObject({
+                body: `Placeholder with example. Automatically calculated values are next major=4.0.0, minor=3.1.0, patch=3.0.1`,
+                draft: true,
+                name: 'v3.0.1 (Code name: Placeholder)',
+                tag_name: 'v3.0.1'
+              })
+              return true
+            }
+          )
+          .reply(200)
+
+        await probot.receive({
+          name: 'push',
+          payload: require('./fixtures/push')
+        })
+
+        expect.assertions(1)
+      })
+    })
+
+    describe('with target-branch config on master', () => {
+      it('targets master branch and calculates version based on releases on master', async () => {
+        getConfigMock('config-with-target-branch-master.yml')
+
+        nock('https://api.github.com')
+          .get('/repos/toolmantim/release-drafter-test-project/releases')
+          .query(true)
+          .reply(200, [
+            require('./fixtures/release-2'),
+            require('./fixtures/release'),
+            require('./fixtures/release-3'),
+            require('./fixtures/pre-release-staging-branch')
+          ])
+
+        nock('https://api.github.com')
+          .post('/graphql', body =>
+            body.query.includes('query findCommitsWithAssociatedPullRequests')
+          )
+          .reply(
+            200,
+            require('./fixtures/__generated__/graphql-commits-merge-commit.json')
+          )
+
+        nock('https://api.github.com')
+          .post(
+            '/repos/toolmantim/release-drafter-test-project/releases',
+            body => {
+              expect(body).toMatchObject({
+                body: `Placeholder with example. Automatically calculated values are next major=3.0.0, minor=2.1.0, patch=2.0.1`,
+                draft: true,
+                name: 'v2.0.1 (Code name: Placeholder)',
+                tag_name: 'v2.0.1',
+                target_commitish: 'master'
+              })
+              return true
+            }
+          )
+          .reply(200)
+
+        await probot.receive({
+          name: 'push',
+          payload: require('./fixtures/push')
+        })
+
+        expect.assertions(1)
+      })
+    })
+
+    describe('with target-branch config on staging', () => {
+      it('targets staging branch and calculates version based on releases on staging', async () => {
+        getConfigMock('config-with-target-branch-staging.yml')
+
+        nock('https://api.github.com')
+          .get('/repos/toolmantim/release-drafter-test-project/releases')
+          .query(true)
+          .reply(200, [
+            require('./fixtures/release-2'),
+            require('./fixtures/release'),
+            require('./fixtures/release-3'),
+            require('./fixtures/pre-release-staging-branch')
+          ])
+
+        nock('https://api.github.com')
+          .post('/graphql', body =>
+            body.query.includes('query findCommitsWithAssociatedPullRequests')
+          )
+          .reply(
+            200,
+            require('./fixtures/__generated__/graphql-commits-merge-commit.json')
+          )
+
+        nock('https://api.github.com')
+          .post(
+            '/repos/toolmantim/release-drafter-test-project/releases',
+            body => {
+              expect(body).toMatchObject({
+                body: `Placeholder with example. Automatically calculated values are next major=4.0.0, minor=3.1.0, patch=3.0.1`,
+                draft: true,
+                name: 'v3.0.1 (Code name: Placeholder)',
+                tag_name: 'v3.0.1',
+                target_commitish: 'staging'
+              })
+              return true
+            }
+          )
+          .reply(200)
+
+        await probot.receive({
+          name: 'push',
+          payload: require('./fixtures/push')
+        })
+
+        expect.assertions(1)
+      })
+    })
+  })
 })
