@@ -121,6 +121,17 @@
     "template": {
       "type": "string"
     },
+    "target-branch": {
+      "anyOf": [
+        {
+          "type": "string",
+          "enum": [null]
+        },
+        {
+          "type": "string"
+        }
+      ]
+    },
     "_extends": {
       "type": "string"
     }
