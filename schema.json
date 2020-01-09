@@ -121,7 +121,11 @@
     "template": {
       "type": "string"
     },
-    "target-branch": {
+    "target-commitish": {
+      "default": "master",
+      "type": "string"
+    },
+    "release-commitish-filter": {
       "anyOf": [
         {
           "type": "string",

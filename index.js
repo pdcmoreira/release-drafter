@@ -30,7 +30,9 @@ module.exports = app => {
     const { draftRelease, lastRelease } = await findReleases({
       app,
       context,
-      branch: config['target-branch']
+      filters: {
+        targetCommitish: config['release-commitish-filter']
+      }
     })
     const {
       commits,
@@ -68,8 +70,7 @@ module.exports = app => {
           body: releaseInfo.body,
           draft: true,
           prerelease: config.prerelease,
-          target_commitish:
-            config['target-branch'] || context.payload.repository.default_branch
+          target_commitish: config['target-commitish']
         })
       )
     } else {
