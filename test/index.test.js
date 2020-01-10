@@ -1712,4 +1712,52 @@ Previous tag: ''
       expect.assertions(2)
     })
   })
+
+  describe('staging production workflow', () => {
+    it('works', async () => {
+      process.env['INPUT_CONFIG-NAME'] = 'release-drafter-production.yml'
+      process.env['INPUT_TAG'] = 'v1.0.2'
+
+      const getConfigScope = getConfigMock(
+        'release-drafter-production.yml',
+        'release-drafter-production.yml'
+      )
+
+      nock('https://api.github.com')
+        .post('/graphql', body =>
+          body.query.includes('query findCommitsWithAssociatedPullRequests')
+        )
+        .reply(200, require('./fixtures/graphql-commits-no-prs.json'))
+
+      nock('https://api.github.com')
+        .get('/repos/toolmantim/release-drafter-test-project/releases')
+        .query(true)
+        // .reply(200, [require('./fixtures/release')])
+        .reply(200, [])
+        .post(
+          '/repos/toolmantim/release-drafter-test-project/releases',
+          body => {
+            // Assert that the correct body was used
+            expect(body).toMatchObject({
+              name: '',
+              tag_name: '',
+              body: `# There's new stuff!\n`,
+              draft: true
+            })
+            return true
+          }
+        )
+        .reply(200)
+
+      await probot.receive({
+        name: 'push',
+        payload: require('./fixtures/push')
+      })
+
+      // Assert that the GET request was called for the correct config file
+      expect(getConfigScope.isDone()).toBe(true)
+
+      expect.assertions(2)
+    })
+  })
 })
