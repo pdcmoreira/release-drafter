@@ -82,8 +82,7 @@ module.exports = app => {
         context,
         draftRelease,
         releaseInfo,
-        shouldDraft,
-        config
+        shouldDraft
       })
     }
 
